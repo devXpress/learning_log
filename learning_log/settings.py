@@ -14,8 +14,44 @@ from pathlib import Path
 import os
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Use PostgreSQL on Heroku, fallback to SQLite locally
+if os.getcwd() == '/app':
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    
+    if DATABASE_URL:
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
+        }
+    else:
+        raise Exception("Heroku: DATABASE_URL not found in environment variables.")
+    
+    # For Heroku: set HTTPS and allowed hosts
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    ALLOWED_HOSTS = ['*']
+
+    # Static files for Heroku
+    STATIC_URL = '/static/'
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
+
+else:
+    # Local SQLite settings
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+    STATIC_URL = '/static/'
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -77,12 +113,6 @@ WSGI_APPLICATION = 'learning_log.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
 
 
 # Password validation
@@ -134,30 +164,3 @@ BOOTSTRAP3 = {
     'include_jquery': True,
     }
 
-# Heroku settings
-if os.getcwd() == '/app':
-    import dj_database_url
-
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    
-    if DATABASE_URL:
-        DATABASES = {
-            'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=True)
-        }
-    else:
-        raise Exception("Heroku: DATABASE_URL not found in environment variables.")
-
-    # Honor the 'X-Forwarded-Proto' header for request.is_secure()
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-    # Set allowed hosts (for production, replace * with your domain(s))
-    ALLOWED_HOSTS = ['*']
-
-    # Static files (CSS, JavaScript, Images)
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
