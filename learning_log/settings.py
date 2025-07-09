@@ -31,13 +31,6 @@ if os.getcwd() == '/app':
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     ALLOWED_HOSTS = ['*']
 
-    # Static files for Heroku
-    STATIC_URL = '/static/'
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
-
 else:
     # Local SQLite settings
     DATABASES = {
@@ -46,12 +39,6 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
-    STATIC_URL = '/static/'
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
-
 
 
 # Quick-start development settings - unsuitable for production
